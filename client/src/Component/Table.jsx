@@ -16,34 +16,53 @@ import UpdatedUser from './UpdatedUser';
 
 export default function Table({ Deletuser }) {
     const [data, setData] = useState([]);
+    const [newUser, setNewUser] = useState({ no: '', vn: '', name: '', amount: '', date: '', address: '', descOfPayment: '', bankAcc: '', invoiceNo: '', preparedBy: '', accounting: '', approvedBy: '' });
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await axios.get('http://localhost:8000/api/get');
-                setData(response.data);
-            } catch (error) {
-                console.log(error);
-            }
-        }
         fetchData();
     }, []);
 
-    const handleUpdateUser = (user) => {
-        setCurrentUser(user);
+    const fetchData = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/get');
+            setData(response.data);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
-    const handleOnSubmit = async (e) => {
-        e.preventDefault();
-        // Perform the update logic here
-        // Reset the currentUser after update
-        setCurrentUser(null);
+    const handleCreateUser = async () => {
+        try {
+            const response = await axios.post('http://localhost:8000/api/create', newUser);
+            setData([...data, response.data.Newuser]);
+            setNewUser({ no: '', vn: '', name: '', amount: '', date: '', address: '', descOfPayment: '', bankAcc: '', invoiceNo: '', preparedBy: '', accounting: '', approvedBy: '' });
+        } catch (error) {
+            console.error('Error creating user:', error);
+        }
+    };
+
+    const handleUpdateUser = async (user) => {
+        try {
+            const response = await axios.put(`http://localhost:8000/api/update/${user._id}`, user);
+            setData(data.map(item => item._id === user._id ? response.data.updateuser : item));
+            setCurrentUser(null);
+        } catch (error) {
+            console.error('Error updating user:', error);
+        }
+    };
+
+    const handleDeleteUser = async (id) => {
+        try {
+            await axios.delete(`http://localhost:8000/api/delete/${id}`);
+            setData(data.filter(user => user._id !== id));
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
     };
 
     return (
         <>
-        
             <Card className="h-full w-full">
                 <CardHeader floated={false} shadow={false} className="rounded-none">
                     <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
@@ -65,7 +84,7 @@ export default function Table({ Deletuser }) {
                             <Button className="flex items-center gap-3" size="sm">
                                 <ArrowDownTrayIcon strokeWidth={2} className="h-4 w-4" /> Download
                             </Button>
-                            <Button className="flex items-center gap-3" size="sm" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                            <Button className="flex items-center gap-3" size="sm" onClick={() => handleCreateUser()} data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                                 <PlusIcon className="h-5 w-5" /> 
                             </Button>
                         </div>
@@ -130,12 +149,12 @@ export default function Table({ Deletuser }) {
                                         </td>
                                         <td className={classes}>
                                             <Tooltip content="Edit User">
-                                                <IconButton variant="text" onClick={() => handleUpdateUser(elem)} data-bs-toggle="modal" data-bs-target="#editEmployeeModal">
+                                                <IconButton variant="text" onClick={() => setCurrentUser(elem)} data-bs-toggle="modal" data-bs-target="#editEmployeeModal">
                                                     <PencilIcon className="h-4 w-4" />
                                                 </IconButton>
                                             </Tooltip>
                                             <Tooltip content="Delete User">
-                                                <IconButton variant="text" onClick={() => Deletuser(elem._id)} data-bs-toggle="modal" data-bs-target="#deleteEmployeeModal">
+                                                <IconButton variant="text" onClick={() => handleDeleteUser(elem._id)} data-bs-toggle="modal" data-bs-target="#deleteEmployeeModal">
                                                     <TrashIcon className="h-4 w-4" />
                                                 </IconButton>
                                             </Tooltip>
@@ -146,9 +165,8 @@ export default function Table({ Deletuser }) {
                         </tbody>
                     </table>
                 </CardBody>
-               
             </Card>
-            {currentUser && <UpdatedUser handleOnSubmit={handleOnSubmit} value={currentUser} handlechange={(e) => setCurrentUser({ ...currentUser, [e.target.name]: e.target.value })} />}
+            {currentUser && <UpdatedUser handleOnSubmit={handleUpdateUser} value={currentUser} handleChange={(e) => setCurrentUser({ ...currentUser, [e.target.name]: e.target.value })} />}
         </>
     );
 }

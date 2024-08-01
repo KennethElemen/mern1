@@ -1,17 +1,25 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Corrected import path for Bootstrap CSS
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Corrected import path for Bootstrap JS
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import UserTable from './Table/UserTable';
-import DefaultSidebar from './Component/SideBar'
-
-import { Toaster } from 'react-hot-toast'
+import DefaultSidebar from './Component/SideBar';
+import Expendetures from './Pages/Expendetures'
+import { Toaster } from 'react-hot-toast';
 
 export default function App() {
   return (
-    <div className='flex flex gap-10 items-center'>
-    <DefaultSidebar/>   
-      <UserTable />    
-    </div>
+    <Router>
+      <div className='flex'>
+        <DefaultSidebar />
+        <div className='flex-grow p-4'>
+          <Toaster />
+          <Routes>
+          
+            <Route path="/expenditures" element={<Expendetures />} />
+            <Route path="/" element={<UserTable />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }

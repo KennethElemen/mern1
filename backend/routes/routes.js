@@ -1,5 +1,9 @@
 import express from 'express'
 import { create,get,Updated,Delete } from '../controllers/usercontrollers.js'
+import { createExpenditure, getExpenditures, updateExpenditure, deleteExpenditure } from '../controllers/Expedetures.js';
+
+
+
 
 const routers=express.Router()
 
